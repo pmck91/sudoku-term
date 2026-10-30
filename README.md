@@ -4,9 +4,7 @@
 [![Download latest release](https://img.shields.io/github/v/release/pmck91/sudoku-term?label=download&sort=semver)](https://github.com/pmck91/sudoku-term/releases/latest)
 
 Terminal Sudoku with four difficulties, pencil notes, hints, undo/redo, and automatic saving.
-Linux only. Requires a terminal at least **80 columns × 24 rows**; full pencil marks appear at **80×42**.
-
-<img src="docs/assets/screenshot_20261030_200658-region.png" alt="Sudoku board with the selected cell, related rows and columns, and keyboard controls" width="800">
+Linux only. Requires a terminal at least **80 columns × 24 rows**.
 
 <details>
 <summary>Menu screenshots</summary>
@@ -16,6 +14,9 @@ Linux only. Requires a terminal at least **80 columns × 24 rows**; full pencil 
 <img src="docs/assets/screenshot_20261030_200607-region.png" alt="Difficulty menu offering Easy, Medium, Hard, and Master" width="800">
 
 </details>
+
+<img src="docs/assets/screenshot_20261030_200658-region.png" alt="Sudoku board with the selected cell, related rows and columns, and keyboard controls" width="800">
+
 
 ## Download and run
 

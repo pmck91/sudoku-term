@@ -230,7 +230,7 @@ func normalize(s string) string {
 	return strings.Join(lines, "\n") + "\n"
 }
 func TestLayoutSnapshots(t *testing.T) {
-	for _, name := range []string{"compact", "expanded", "hint", "errors", "resize", "home", "help"} {
+	for _, name := range []string{"compact", "expanded", "hint", "expanded-hint", "errors", "resize", "home", "help"} {
 		t.Run(name, func(t *testing.T) {
 			m := testModel()
 			m.game.Cursor = 2
@@ -243,6 +243,10 @@ func TestLayoutSnapshots(t *testing.T) {
 			case "expanded":
 				m.width, m.height = 100, 45
 			case "hint":
+				m.hint, _ = m.game.Hint()
+				m.screen = hint
+			case "expanded-hint":
+				m.width, m.height = 100, 45
 				m.hint, _ = m.game.Hint()
 				m.screen = hint
 			case "errors":
@@ -283,6 +287,63 @@ func TestLayoutSnapshots(t *testing.T) {
 		})
 	}
 }
+
+func TestBoardProportionsAndResize(t *testing.T) {
+	m := testModel()
+	m.game.Cursor = 2
+	m.game.Enter(2, 1, true)
+	m.game.Enter(2, 4, true)
+	before := m.game.Board
+	for _, tc := range []struct {
+		width, height int
+		expanded      bool
+	}{
+		{80, 24, false},
+		{80, 45, false},
+		{97, 42, false},
+		{98, 41, false},
+		{98, 42, true},
+		{100, 45, true},
+		{80, 24, false},
+	} {
+		m.Update(tea.WindowSizeMsg{Width: tc.width, Height: tc.height})
+		if m.expandedBoard() != tc.expanded {
+			t.Fatalf("%dx%d: wrong board layout", tc.width, tc.height)
+		}
+		board := m.boardView(tc.expanded)
+		// At a 2:1 character height/width ratio, the outer board should
+		// be within one character column of a physical square.
+		if difference := lipgloss.Width(board) - 2*lipgloss.Height(board); difference < -1 || difference > 1 {
+			t.Fatalf("%dx%d: board proportions are %dx%d", tc.width, tc.height, lipgloss.Width(board), lipgloss.Height(board))
+		}
+		view := m.View().Content
+		if lipgloss.Height(view) > tc.height || lipgloss.Width(view) > tc.width {
+			t.Fatalf("%dx%d: layout overflows the terminal", tc.width, tc.height)
+		}
+		if m.game.Board != before || m.game.Cursor != 2 {
+			t.Fatal("resize changed game state")
+		}
+	}
+}
+
+func TestExpandedCellSpacing(t *testing.T) {
+	m := testModel()
+	for _, digit := range []uint8{1, 2, 3, 4, 5, 6, 7, 8, 9} {
+		m.game.Enter(2, digit, true)
+	}
+	for row, want := range []string{" 1 2 3 ", " 4 5 6 ", " 7 8 9 "} {
+		if got := ansi.Strip(m.cellView(2, row, true)); got != want {
+			t.Fatalf("notes row %d: %q, want %q", row, got, want)
+		}
+	}
+	m.game.Enter(2, 4, false)
+	for row, want := range []string{"       ", "   4   ", "       "} {
+		if got := ansi.Strip(m.cellView(2, row, true)); got != want {
+			t.Fatalf("answer row %d: %q, want %q", row, got, want)
+		}
+	}
+}
+
 func TestErrorStylingAndNoColorSelection(t *testing.T) {
 	m := testModel()
 	m.game.Cursor = 2

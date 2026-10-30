@@ -37,6 +37,12 @@ Golden files in `internal/tui/testdata` cover compact, expanded, hint, error,
 home, help, and resize screens. Tests also check that the rendered output fits
 the configured terminal dimensions.
 
+Compact cells use three columns and one row. Expanded cells use seven columns
+and three rows, with spaces between pencil-mark digits. Including the border
+spacing, both layouts use two columns for each row to account for typical
+terminal characters being about twice as tall as they are wide. Expanded mode
+requires at least 98×42; other supported sizes use the compact board.
+
 After reviewing an intentional layout change, regenerate the snapshots:
 
 ```sh

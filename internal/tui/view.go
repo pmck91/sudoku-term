@@ -156,12 +156,11 @@ func (m *Model) helpView() string {
 }
 
 func (m *Model) playView() string {
-	expanded := m.height >= 42
-	boardWidth := 37
-	if expanded {
-		boardWidth = 55
-	}
-	panelWidth := 78 - boardWidth - 3
+	expanded := m.expandedBoard()
+	boardWidth := 9*(cellWidth(expanded)+1) + 1
+	// Leave at least 20 columns for the sidebar and one column at each edge.
+	contentWidth := max(78, boardWidth+3+20)
+	panelWidth := contentWidth - boardWidth - 3
 	g := m.game
 	right := g.Difficulty.String()
 	if g.TimerVisible {
@@ -173,7 +172,7 @@ func (m *Model) playView() string {
 	}
 	right += "  ·  " + status
 	left := "S U D O K U"
-	header := m.accent(left) + strings.Repeat(" ", 78-lipgloss.Width(left)-lipgloss.Width(right)) + m.muted(right)
+	header := m.accent(left) + strings.Repeat(" ", contentWidth-lipgloss.Width(left)-lipgloss.Width(right)) + m.muted(right)
 	body := lipgloss.JoinHorizontal(lipgloss.Top, m.boardView(expanded), "   ", m.panelView(panelWidth))
 	footer := m.muted("arrows/hjkl move  1–9 enter  n notes  u undo  Ctrl+R redo  i hint  ? help")
 	second := m.muted("Backspace clear   ·   Esc pause   ·   t timer   ·   q quit")
@@ -182,15 +181,28 @@ func (m *Model) playView() string {
 		second = m.muted("Hints pause the timer. Every applied step can be undone.")
 	}
 	if m.message != "" && time.Now().Before(m.messageUntil) {
-		second = m.style(m.colors().accent).Render(m.wrap(m.message, 78))
+		second = m.style(m.colors().accent).Render(m.wrap(m.message, contentWidth))
 	}
 	return header + "\n\n" + body + "\n\n" + footer + "\n" + second
 }
 
-func (m *Model) boardView(expanded bool) string {
-	w, h := 3, 1
+func (m *Model) expandedBoard() bool {
+	return m.width >= 98 && m.height >= 42
+}
+
+func cellWidth(expanded bool) int {
 	if expanded {
-		w, h = 5, 3
+		// With borders, each cell spans 8 columns by 4 rows. Terminal
+		// characters are commonly about twice as tall as they are wide.
+		return 7
+	}
+	return 3
+}
+
+func (m *Model) boardView(expanded bool) string {
+	w, h := cellWidth(expanded), 1
+	if expanded {
+		h = 3
 	}
 	var lines []string
 	for r := 0; r < 9; r++ {
@@ -264,17 +276,12 @@ func (m *Model) cellView(i, sub int, expanded bool) string {
 	if !m.plain && bg != "" {
 		style = style.Background(lipgloss.Color(bg))
 	}
-	width := 3
-	if expanded {
-		width = 5
-	}
+	width := cellWidth(expanded)
 	content := strings.Repeat(" ", width)
 	if cell.Value != 0 {
 		if !expanded || sub == 1 {
-			content = fmt.Sprintf(" %d ", cell.Value)
-			if expanded {
-				content = " " + content + " "
-			}
+			padding := strings.Repeat(" ", (width-1)/2)
+			content = fmt.Sprintf("%s%d%s", padding, cell.Value, padding)
 		}
 		if g.Givens[i] != 0 {
 			style = style.Bold(true)
@@ -296,6 +303,9 @@ func (m *Model) cellView(i, sub int, expanded bool) string {
 		if expanded {
 			s := ""
 			for n := 1; n <= 3; n++ {
+				if n > 1 {
+					s += " "
+				}
 				d := uint8(sub*3 + n)
 				if cell.Notes&puzzle.Bit(d) != 0 {
 					s += fmt.Sprint(d)
