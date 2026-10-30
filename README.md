@@ -1,125 +1,78 @@
 # Sudoku
 
-A quiet Sudoku game for the Linux terminal. Fresh puzzles, pencil notes,
-hints, and a game that's waiting where you left it.
+[![Build on main](https://github.com/pmck91/sudoku-term/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/pmck91/sudoku-term/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
+[![Download latest release](https://img.shields.io/github/v/release/pmck91/sudoku-term?label=download&sort=semver)](https://github.com/pmck91/sudoku-term/releases/latest)
 
-## Run
+Terminal Sudoku with four difficulties, pencil notes, hints, undo/redo, and automatic saving.
+Linux only. Requires a terminal at least **80 columns × 24 rows**; full pencil marks appear at **80×42**.
 
-Requires **Linux**, **Go 1.26 or newer**, and an interactive terminal at least
-**80 columns × 24 rows**.
+<img src="docs/assets/screenshot_20261030_200658-region.png" alt="Sudoku board with the selected cell, related rows and columns, and keyboard controls" width="800">
+
+<details>
+<summary>Menu screenshots</summary>
+
+<img src="docs/assets/screenshot_20261030_200538-region.png" alt="Main menu with Resume game selected" width="800">
+
+<img src="docs/assets/screenshot_20261030_200607-region.png" alt="Difficulty menu offering Easy, Medium, Hard, and Master" width="800">
+
+</details>
+
+## Download and run
+
+Download the Linux **amd64** or **arm64** archive from the
+[latest release](https://github.com/pmck91/sudoku-term/releases/latest), extract it, and run:
 
 ```sh
-go run ./cmd/sudoku
+./sudoku
 ```
 
-Or build a standalone executable:
+Release binaries do not require Go. Playing and generating puzzles work offline.
+
+## Build from source
+
+Requires **Go 1.26 or newer** and Make.
 
 ```sh
+git clone https://github.com/pmck91/sudoku-term.git
+cd sudoku-term
 make build
 ./sudoku
 ```
 
-The first build downloads dependencies. Playing and generating puzzles work
-entirely offline. No special fonts are needed. Colors adapt to light and dark
-terminals; set `NO_COLOR=1` for a layout with a bracketed selection and no colors.
+To run directly from source: `go run ./cmd/sudoku`.
+Set `NO_COLOR=1` to disable colors.
 
-## Playing
-
-Use **Resume game** or choose a difficulty under **New game**. Every row,
-column, and 3×3 box must contain the digits 1–9 exactly once.
+## Controls
 
 | Key | Action |
 | --- | --- |
-| Arrows or `h j k l` | Move one cell, stopping at board edges |
-| `1`–`9` | Enter or replace an answer; toggle a note in Notes mode |
-| `n` | Switch between Answer and Notes modes |
-| Backspace, Delete, or `0` | Clear the selected editable cell |
+| Arrows / `h j k l` | Move |
+| `1`–`9` | Enter an answer or toggle a note |
+| `n` | Switch Answer / Notes mode |
+| Backspace / Delete / `0` | Clear the cell |
 | `u` / Ctrl+R | Undo / redo |
-| `i` | Explain and highlight a logical hint |
-| Enter / Esc while viewing a hint | Apply / dismiss the hint |
-| `t` | Show or hide the timer |
+| `i` | Show a hint; Enter applies it, Esc dismisses it |
+| `t` | Show / hide the timer |
 | `?` | Help |
-| Esc | Pause menu / return |
-| `q` or Ctrl+C | Save and quit |
+| Esc | Pause / return |
+| `q` / Ctrl+C | Save and quit |
 
-Starting clues cannot be changed. Notes are entered only in empty cells.
-Incorrect answers appear red and underlined, even if they do not duplicate
-another digit. They remain editable, and there are no penalties or mistake limits.
+Wrong answers appear red. Correct answers remove matching notes from their peers.
+Each cell update is saved, including undo/redo and applied hints. Choose **Resume game**
+on startup to continue; only one game is kept.
 
-A correct answer removes matching notes in its row, column, and box. Undo
-restores the answer and all affected notes together. New edits discard redo history.
-
-At 80×24 the board shows a dot for cells containing notes; the selected cell's
-complete pencil notes appear beside it. At 80×42 or larger, every cell has room
-for its own 3×3 pencil notes. Smaller terminals show a resize message and pause play.
-
-The optional timer measures active play. Menus, help, hints, resizing below the
-minimum, and time outside the app are excluded. Losing terminal focus pauses it
-when the terminal reports focus events. Hiding the timer does not stop it.
-You can review a completed board and undo the final move to continue playing.
-
-## Difficulties and hints
-
-Each puzzle is freshly generated with a randomized search, verified to have
-exactly one solution, and graded by the logical techniques required by the app's
-solver. The levels are specific to this game, rather than an industry standard.
-
-| Level | Techniques added to earlier levels |
-| --- | --- |
-| Easy | Naked and hidden singles |
-| Medium | Locked candidates; naked and hidden pairs |
-| Hard | Naked and hidden triples; X-Wing |
-| Master | XY-Wing, Swordfish, simple coloring |
-
-The generator keeps searching until a puzzle matches the requested level.
-Generation times vary; Esc cancels without replacing the previous game. There
-is no puzzle-bank fallback and no guessing in the logical solving path.
-
-Hints use the same deductions as grading. They explain one step before changing
-anything. Enter applies it as one undoable action. Eliminations update notes;
-if an affected cell has no notes, its remaining logical candidates are populated.
-Manual notes are annotations, not constraints on the hint solver. Applied logical
-eliminations persist across restarts and are rebuilt when an answer changes.
-Wrong answers must be corrected before requesting another logical hint.
-
-## Saving
-
-There is **one saved game**. Every cell edit, undo/redo, and applied hint queues
-its own atomic save. Quitting waits for pending writes and also saves the cursor,
-input mode, timer preference, and elapsed time. Undo/redo history survives restarts.
-**Saved** appears only after the queued writes have completed.
-
-The save is `$XDG_STATE_HOME/sudoku-term/game.json`, or
-`~/.local/state/sudoku-term/game.json` when that variable is unset, empty, or
-relative. The directory is created with mode 0700 and saves with mode 0600.
-An advisory lock prevents two running instances from overwriting one another.
-
-Writes synchronize a temporary file, rename it over the save, then synchronize
-the directory. On a write failure, editing pauses: retry with `r` or explicitly
-quit without saving pending changes with `q`. Progress since the last successful
-save can be lost on abrupt process termination or a failed write.
-
-An invalid or unsupported save is preserved until you explicitly choose to
-replace it. Starting a new game replaces an unfinished game only after confirmation,
-successful generation, and a successful save. A completed game remains available
-for review until replaced.
+Saves live at `$XDG_STATE_HOME/sudoku-term/game.json`, defaulting to
+`~/.local/state/sudoku-term/game.json`.
 
 ## Development
 
-The implementation separates the logical puzzle engine, reversible game actions,
-atomic Linux storage, and the Bubble Tea / Lip Gloss presentation. The versioned
-JSON format is internal to the app; unsupported versions are never silently loaded.
-
 ```sh
-make test       # Race-enabled solver, generation, game, storage, and UI tests
-make check      # Vet and formatting checks
-make build
-python3 scripts/pty_smoke.py ./sudoku
+make check                              # Formatting and vet
+make test                               # Tests with race detection
+python3 scripts/pty_smoke.py ./sudoku     # Terminal smoke test after building
 ```
 
-UI golden files cover compact, expanded, hint, error, home, help, and resize
-screens. After reviewing an intentional layout change, regenerate them with:
-
-```sh
-UPDATE_GOLDEN=1 go test ./internal/tui -run TestLayoutSnapshots
-```
+- [Board generation](docs/generator.md)
+- [Solver and difficulty grading](docs/solver.md)
+- [Hints and candidate state](docs/hints.md)
+- [Development and releases](docs/development.md)

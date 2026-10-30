@@ -13,14 +13,17 @@ import (
 	"sudoku-term/internal/tui"
 )
 
+// Release builds set this with -ldflags "-X main.version=...".
+var version = "dev"
+
 func run() error {
-	version := flag.Bool("version", false, "print the version and exit")
+	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Usage = func() {
 		fmt.Fprintln(flag.CommandLine.Output(), "Usage: sudoku [--version]\n\nA quiet, keyboard-driven Sudoku game.\n\nArrows / hjkl move · 1–9 enter · n notes · i hint · ? help · q quit\n\nOne game is saved automatically in $XDG_STATE_HOME/sudoku-term/game.json\n(default: ~/.local/state/sudoku-term/game.json).")
 	}
 	flag.Parse()
-	if *version {
-		fmt.Println("sudoku 0.1.0")
+	if *showVersion {
+		fmt.Println("sudoku", version)
 		return nil
 	}
 	if flag.NArg() != 0 {
