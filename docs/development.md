@@ -90,7 +90,7 @@ git push origin v0.1.0
 
 [`package-release.sh`](../scripts/package-release.sh) validates the version tag,
 builds Linux amd64 and arm64 binaries with CGO disabled, and packages each binary
-with the README. It embeds the version without the leading `v` in `--version`.
+with the README and LICENSE. It embeds the version without the leading `v` in `--version`.
 
 Release assets are:
 

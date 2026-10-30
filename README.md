@@ -77,3 +77,9 @@ python3 scripts/pty_smoke.py ./sudoku     # Terminal smoke test after building
 - [Solver and difficulty grading](docs/solver.md)
 - [Hints and candidate state](docs/hints.md)
 - [Development and releases](docs/development.md)
+
+## License
+
+[BSD Zero Clause (0BSD)](LICENSE): use, modify, and redistribute this project's
+code for any purpose, including commercially, without an attribution requirement.
+Dependencies retain their own licenses.

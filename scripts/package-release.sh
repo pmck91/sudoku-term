@@ -13,6 +13,7 @@ stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
 mkdir -p "$output"
 cp README.md "$stage/README.md"
+cp LICENSE "$stage/LICENSE"
 
 archives=()
 for arch in amd64 arm64; do
@@ -21,7 +22,7 @@ for arch in amd64 arm64; do
     -ldflags "-s -w -X main.version=$version" \
     -o "$stage/sudoku" ./cmd/sudoku
   archive="sudoku_${tag}_linux_${arch}.tar.gz"
-  tar -czf "$output/$archive" -C "$stage" sudoku README.md
+  tar -czf "$output/$archive" -C "$stage" sudoku README.md LICENSE
   archives+=("$archive")
 done
 
