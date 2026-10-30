@@ -1,0 +1,24 @@
+        ╭──────────────────────────────────────────────────────────────╮
+        │                                                              │
+        │   Make yourself at home                                      │
+        │                                                              │
+        │   Fill each row, column, and 3×3 box with 1–9.               │
+        │   Starting clues stay fixed. Red answers need another        │
+        │   look.                                                      │
+        │                                                              │
+        │   Arrows / hjkl       Move around the board                  │
+        │   1–9                 Enter an answer or toggle a note       │
+        │   n                   Switch Answer / Notes mode             │
+        │   Backspace / Del / 0  Clear the selected cell               │
+        │   u / Ctrl+R          Undo / redo a whole action             │
+        │   i                   Explain a hint; Enter applies it       │
+        │   t                   Show / hide the timer                  │
+        │   Esc                 Pause / return                         │
+        │   q / Ctrl+C          Save and quit                          │
+        │                                                              │
+        │                                                              │
+        │   Your progress and undo history are saved as you play.      │
+        │                                                              │
+        │   Enter / Esc  Return                                        │
+        │                                                              │
+        ╰──────────────────────────────────────────────────────────────╯
